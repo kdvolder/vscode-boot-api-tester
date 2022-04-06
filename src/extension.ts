@@ -18,7 +18,19 @@ interface ExtensionAPI {
 	  * An event which fires on live process data change. Payload is processKey.
 	  */
 	 readonly onDidLiveProcessUpdate: Event<string>
- }
+ 
+	 /**
+	  * A command to get live process data.
+	  */
+	 readonly getLiveProcessData: (query: SimpleQuery | BeansQuery) => Promise<any>
+ 
+	 /**
+	  * A command to list all currently connected processes.
+	  * 
+	  * Returns a list of processKeys.
+	  */
+	 readonly listConnectedProcesses: () => Promise<string[]>
+  }
 
 interface LiveProcessDataQuery {
     /**
@@ -57,16 +69,17 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 		api.onDidLiveProcessUpdate((update) => {
 			console.log("Update live process: ", update);
-		})
+		});
 	}
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('vscode-boot-api-tester.helloWorld', () => {
+	let disposable = vscode.commands.registerCommand('vscode-boot-api-tester.helloWorld', async () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from vscode-boot-api-tester!');
+		let processes = await api?.listConnectedProcesses();
+		vscode.window.showInformationMessage(`Processes now connected: ${processes}`);
 	});
 
 	context.subscriptions.push(disposable);
