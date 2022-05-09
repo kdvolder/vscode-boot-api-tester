@@ -3,34 +3,40 @@
 import * as vscode from 'vscode';
 import {Event} from 'vscode';
 
+interface LiveProcess {
+	type: string;
+	processKey: string;
+	processName: string;
+}
+
 interface ExtensionAPI {
     /**
      * An event which fires on live process is connected. Payload is processKey.
      */
-	 readonly onDidLiveProcessConnect: Event<string>
+    readonly onDidLiveProcessConnect: Event<LiveProcess>
 
-	 /**
-	  * An event which fires on live process is disconnected. Payload is processKey.
-	  */
-	 readonly onDidLiveProcessDisconnect: Event<string>
- 
-	 /**
-	  * An event which fires on live process data change. Payload is processKey.
-	  */
-	 readonly onDidLiveProcessUpdate: Event<string>
- 
-	 /**
-	  * A command to get live process data.
-	  */
-	 readonly getLiveProcessData: (query: SimpleQuery | BeansQuery) => Promise<any>
- 
-	 /**
-	  * A command to list all currently connected processes.
-	  * 
-	  * Returns a list of processKeys.
-	  */
-	 readonly listConnectedProcesses: () => Promise<string[]>
-  }
+    /**
+     * An event which fires on live process is disconnected. Payload is processKey.
+     */
+    readonly onDidLiveProcessDisconnect: Event<LiveProcess>
+
+	/**
+     * An event which fires on live process data change. Payload is processKey.
+     */
+	readonly onDidLiveProcessUpdate: Event<LiveProcess>
+
+    /**
+     * A command to get live process data.
+     */
+    readonly getLiveProcessData: (query: SimpleQuery | BeansQuery) => Promise<any>
+
+    /**
+     * A command to list all currently connected processes.
+     * 
+     * Returns a list of processKeys.
+     */
+    readonly listConnectedProcesses: () => Promise<LiveProcess[]>
+}
 
 interface LiveProcessDataQuery {
     /**
@@ -79,7 +85,7 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		let processes = await api?.listConnectedProcesses();
-		vscode.window.showInformationMessage(`Processes now connected: ${processes}`);
+		vscode.window.showInformationMessage(`Processes now connected: ${processes?.map(p => JSON.stringify(p))}`);
 	});
 
 	context.subscriptions.push(disposable);
